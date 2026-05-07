@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a0e0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="阿公智慧">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>阿公智慧 Grandpa's Edge</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #1a0e0a;
+  --bg-layer: #241410;
+  --paper: #f4ead5;
+  --ink: #2b1810;
+  --red: #c8392c;
+  --gold: #d4a04a;
+  --jade: #7a8c5c;
+  --faded: #8b6f47;
+}
+body {
+  font-family: "Noto Serif TC", "Songti TC", "PingFang TC", serif;
+  background: radial-gradient(ellipse at top, var(--bg-layer) 0%, var(--bg) 70%), var(--bg);
+  color: var(--paper);
+  min-height: 100vh;
+  padding: 32px 20px 60px;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 760px; margin: 0 auto; }
+
+header { text-align: center; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid rgba(212,160,74,0.2); }
+.brand-tag {
+  display: inline-block;
+  padding: 3px 14px;
+  border: 1px solid rgba(212,160,74,0.4);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+h1 {
+  font-size: clamp(32px, 7vw, 44px);
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+.date-line {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--faded);
+  letter-spacing: 0.2em;
+}
+
+.score-section {
+  text-align: center;
+  margin: 32px 0 40px;
+}
+.score-label {
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  color: var(--faded);
+  margin-bottom: 4px;
+}
+.score-num {
+  font-size: clamp(80px, 22vw, 140px);
+  font-weight: 200;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.5s;
+}
+.score-suffix { font-size: 11px; color: var(--faded); margin: 4px 0 14px; }
+.score-pill {
+  display: inline-block;
+  padding: 6px 20px;
+  font-size: 13px;
+  letter-spacing: 0.3em;
+  color: var(--paper);
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.score-quote {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+
+.section-h {
+  font-size: 13px;
+  color: var(--gold);
+  letter-spacing: 0.25em;
+  margin: 32px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(212,160,74,0.15);
+}
+
+/* 數據摘要 */
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 24px;
+  background: rgba(36,20,16,0.7);
+  padding: 18px 20px;
+  border: 1px solid rgba(212,160,74,0.15);
+}
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(139,111,71,0.2);
+  font-size: 13px;
+}
+.data-row:last-child { border-bottom: none; }
+.data-label { color: rgba(244,234,213,0.6); font-size: 12px; }
+.data-val {
+  color: var(--gold);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.data-val.alert { color: var(--red); }
+.data-unit { font-size: 10px; opacity: 0.6; margin-left: 3px; }
+
+/* 四模組 */
+.modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
+.module-card {
+  background: var(--paper);
+  padding: 14px 14px 16px;
+  border: 1px solid rgba(139,111,71,0.2);
+  position: relative;
+}
+.module-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.module-name {
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.module-score {
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.module-max { font-size: 11px; color: var(--faded); }
+.module-bar {
+  height: 3px;
+  background: rgba(139,111,71,0.2);
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.module-bar-fill { height: 100%; transition: width 0.8s ease; }
+.module-notes {
+  font-size: 11px;
+  color: var(--ink);
+  opacity: 0.85;
+  line-height: 1.6;
+}
+.module-notes div { padding-left: 12px; position: relative; }
+.module-notes div::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--red);
+}
+
+/* 趨勢圖 */
+#trendChart { width: 100%; height: 200px; background: rgba(36,20,16,0.5); margin-top: 14px; }
+
+/* 狀態條 */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(212,160,74,0.15);
+  font-size: 11px;
+  color: var(--faded);
+}
+.refresh-btn {
+  background: none;
+  border: 1px solid rgba(212,160,74,0.4);
+  color: var(--gold);
+  padding: 6px 14px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  font-family: inherit;
+}
+.refresh-btn:active { background: rgba(212,160,74,0.1); }
+
+footer {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--faded);
+  letter-spacing: 0.2em;
+  padding-top: 18px;
+  border-top: 1px solid rgba(212,160,74,0.1);
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--faded);
+  font-size: 14px;
+}
+.error {
+  background: rgba(200,57,44,0.15);
+  border: 1px solid var(--red);
+  color: var(--paper);
+  padding: 14px;
+  margin: 20px 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+  body { padding: 24px 14px 50px; }
+  .data-grid { grid-template-columns: 1fr; gap: 0; padding: 14px 16px; }
+  .modules { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app">
+  <div class="loading">載入中...</div>
+</div>
+
+<script>
+const DATA_URL = 'https://raw.githubusercontent.com/micliou877/gpa/main/data.json';
+const HISTORY_URL = 'https://raw.githubusercontent.com/micliou877/gpa/main/history.json';
+
+const COLORS = {
+  red: '#c8392c', gold: '#d4a04a', jade: '#7a8c5c',
+  paper: '#f4ead5', faded: '#8b6f47', ink: '#2b1810'
+};
+
+function totalColor(t) {
+  if (t <= 30) return COLORS.jade;
+  if (t <= 70) return COLORS.gold;
+  return COLORS.red;
+}
+function moduleColor(s, max=25) {
+  const pct = s / max * 100;
+  if (pct <= 30) return COLORS.jade;
+  if (pct <= 70) return COLORS.gold;
+  return COLORS.red;
+}
+function gradeLabel(t) {
+  if (t <= 30) return '安全期';
+  if (t <= 70) return '震盪換手期';
+  return '極度危險期';
+}
+function gradeQuote(t) {
+  if (t <= 30) return '可以慢慢撿。';
+  if (t <= 70) return '該收的收,該抱的抱。';
+  return '茶要涼了。';
+}
+function fmtDate(d) {
+  return `${d.slice(0,4)}/${d.slice(4,6)}/${d.slice(6,8)}`;
+}
+
+async function load() {
+  try {
+    // 加上 cache buster 確保拿最新
+    const cb = Date.now();
+    const [data, hist] = await Promise.all([
+      fetch(`${DATA_URL}?t=${cb}`).then(r => r.json()),
+      fetch(`${HISTORY_URL}?t=${cb}`).then(r => r.json()).catch(() => [])
+    ]);
+    render(data, hist);
+  } catch (e) {
+    document.getElementById('app').innerHTML = `
+      <header><h1>阿公智慧</h1></header>
+      <div class="error">
+        資料載入失敗。請確認 Colab 已成功上傳 data.json。<br>
+        錯誤: ${e.message}
+      </div>`;
+  }
+}
+
+function render(d, hist) {
+  const score = d.score;
+  const sc = totalColor(score.total);
+  const updated = new Date(d.updated_at);
+  const updatedStr = updated.toLocaleString('zh-TW', { 
+    month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+  });
+
+  const market = d.market || {};
+  const spot = d.spot || {};
+  const futures = d.futures || {};
+  const margin = d.margin || {};
+
+  const taiex = market['加權指數'] || 0;
+  const change = d.index_change_pct || 0;
+  const spotF = spot['外資'] || 0;
+  const futF = futures['外資'] || 0;
+  const marginChg = margin ? margin['融資增減'] : null;
+  const count = market['千金股數量'] || 0;
+  const dev = d.season_deviation;
+  const basis = d.basis_pct || 0;
+
+  document.getElementById('app').innerHTML = `
+    <header>
+      <div class="brand-tag">GRANDPA'S EDGE</div>
+      <h1>阿公智慧</h1>
+      <div class="date-line">${fmtDate(d.date)} · 盤後監控</div>
+    </header>
+
+    <section class="score-section">
+      <div class="score-label">考驗人性指數</div>
+      <div class="score-num" style="color:${sc};text-shadow:0 0 60px ${sc}66">${score.total}</div>
+      <div class="score-suffix">/ 100</div>
+      <div class="score-pill" style="background:${sc}">${score.label}</div>
+      <div class="score-quote">「${score.quote}」</div>
+    </section>
+
+    <h2 class="section-h">數據摘要</h2>
+    <div class="data-grid">
+      <div>
+        ${dataRow('加權指數', taiex.toLocaleString('zh-TW',{maximumFractionDigits:0}))}
+        ${dataRow('當日漲跌', `${change>=0?'+':''}${change.toFixed(2)}%`, Math.abs(change)>1.5)}
+        ${dataRow('千金股', count, '檔', count>=25)}
+        ${dataRow('季線乖離', dev!==null ? `${dev>=0?'+':''}${dev.toFixed(1)}%` : '資料不足', '', dev>15)}
+      </div>
+      <div>
+        ${dataRow('外資現貨', `${spotF>=0?'+':''}${spotF.toFixed(1)}`, '億', spotF<50)}
+        ${dataRow('外資期貨', futF.toLocaleString(), '口', futF<-40000)}
+        ${dataRow('融資增減', marginChg!==null && marginChg!==undefined ? `${marginChg>=0?'+':''}${marginChg.toFixed(1)}` : '待 T+1', '億', marginChg>50)}
+        ${dataRow('期現價差', `${basis>=0?'+':''}${basis.toFixed(2)}%`, '', basis>1)}
+      </div>
+    </div>
+
+    <h2 class="section-h">四模組明細</h2>
+    <div class="modules">
+      ${Object.entries(score.modules).map(([name, mod]) => moduleCard(name, mod)).join('')}
+    </div>
+
+    ${hist && hist.length >= 2 ? `
+      <h2 class="section-h">指數趨勢 ${hist.length} 日</h2>
+      <svg id="trendChart" viewBox="0 0 760 200" preserveAspectRatio="none"></svg>
+    ` : ''}
+
+    <div class="status-bar">
+      <span>更新於 ${updatedStr}</span>
+      <button class="refresh-btn" onclick="load()">重新整理</button>
+    </div>
+
+    <footer>資料源 · 證交所 TWSE / 期交所 TAIFEX / FinMind</footer>
+  `;
+
+  // 畫趨勢圖
+  if (hist && hist.length >= 2) drawTrend(hist);
+}
+
+function dataRow(label, val, unit, alert) {
+  if (typeof unit === 'boolean') { alert = unit; unit = ''; }
+  return `
+    <div class="data-row">
+      <span class="data-label">${label}</span>
+      <span class="data-val ${alert?'alert':''}">${val}${unit?`<span class="data-unit">${unit}</span>`:''}</span>
+    </div>`;
+}
+
+function moduleCard(name, mod) {
+  const color = moduleColor(mod.score);
+  const pct = (mod.score / 25) * 100;
+  return `
+    <div class="module-card">
+      <div class="module-head">
+        <span class="module-name">${name}</span>
+        <span class="module-score" style="color:${color}">
+          ${mod.score}<span class="module-max">/25</span>
+        </span>
+      </div>
+      <div class="module-bar">
+        <div class="module-bar-fill" style="width:${pct}%;background:${color}"></div>
+      </div>
+      <div class="module-notes">
+        ${(mod.notes || []).slice(0,2).map(n => `<div>${n}</div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function drawTrend(hist) {
+  const svg = document.getElementById('trendChart');
+  if (!svg) return;
+  const W = 760, H = 200;
+  const pad = { l: 30, r: 10, t: 10, b: 25 };
+  const innerW = W - pad.l - pad.r;
+  const innerH = H - pad.t - pad.b;
+
+  const xs = hist.map((_, i) => pad.l + (i / (hist.length - 1)) * innerW);
+  const ys = hist.map(h => pad.t + innerH - (h.score / 100) * innerH);
+  const path = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
+
+  // 區域底色 (安全/震盪/危險)
+  const yAt = v => pad.t + innerH - (v / 100) * innerH;
+  const bgRects = `
+    <rect x="${pad.l}" y="${yAt(70)}" width="${innerW}" height="${yAt(30) - yAt(70)}" fill="${COLORS.gold}" opacity="0.08"/>
+    <rect x="${pad.l}" y="${pad.t}" width="${innerW}" height="${yAt(70) - pad.t}" fill="${COLORS.red}" opacity="0.1"/>
+    <rect x="${pad.l}" y="${yAt(30)}" width="${innerW}" height="${pad.t + innerH - yAt(30)}" fill="${COLORS.jade}" opacity="0.08"/>
+  `;
+
+  // y 軸刻度
+  const yTicks = [0, 30, 70, 100].map(v => `
+    <text x="${pad.l - 6}" y="${yAt(v) + 3}" font-size="9" fill="${COLORS.faded}" text-anchor="end">${v}</text>
+    <line x1="${pad.l}" y1="${yAt(v)}" x2="${W - pad.r}" y2="${yAt(v)}" stroke="${COLORS.faded}" stroke-width="0.5" opacity="0.2"/>
+  `).join('');
+
+  // x 軸首尾日期
+  const firstDate = hist[0].date;
+  const lastDate = hist[hist.length - 1].date;
+  const xLabels = `
+    <text x="${pad.l}" y="${H - 8}" font-size="9" fill="${COLORS.faded}">${firstDate.slice(4,6)}/${firstDate.slice(6,8)}</text>
+    <text x="${W - pad.r}" y="${H - 8}" font-size="9" fill="${COLORS.faded}" text-anchor="end">${lastDate.slice(4,6)}/${lastDate.slice(6,8)}</text>
+  `;
+
+  // 最後一個點放大
+  const lastX = xs[xs.length - 1], lastY = ys[ys.length - 1];
+  const lastScore = hist[hist.length - 1].score;
+  const lastColor = totalColor(lastScore);
+
+  svg.innerHTML = `
+    ${bgRects}
+    ${yTicks}
+    ${xLabels}
+    <path d="${path}" fill="none" stroke="${COLORS.gold}" stroke-width="1.5"/>
+    <circle cx="${lastX}" cy="${lastY}" r="5" fill="${lastColor}" stroke="${COLORS.paper}" stroke-width="2"/>
+  `;
+}
+
+// 啟動
+load();
+
+// PWA service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
